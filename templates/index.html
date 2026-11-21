@@ -1,0 +1,107 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Assistant</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    <header>
+        <div class="logo">✦ Assistly</div>
+        <span class="status">● Gemini AI</span>
+    </header>
+
+    <main>
+        <section class="hero">
+            <span class="tag">YOUR AI COMPANION</span>
+            <h1>How can I <span>help you today?</span></h1>
+            <p>Ask questions, simplify emails and get things done smarter.</p>
+        </section>
+
+        <section class="cards">
+
+            <div class="card">
+                <div class="icon purple">✦</div>
+                <h2>Ask Anything</h2>
+                <p>Get answers, ideas and explanations.</p>
+
+                <form id="askForm">
+                    <textarea name="question" placeholder="Ask me anything..." required></textarea>
+                    <button type="submit">Ask AI <span>↗</span></button>
+                </form>
+
+                <div class="loading hidden" id="ans-loading">✦ Generating response...</div>
+                <div class="result hidden" id="answer-box">
+                    <h3>✦ AI Response</h3>
+                    <div id="answer"></div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="icon blue">✉</div>
+                <h2>Email Summarizer</h2>
+                <p>Turn lengthy emails into clear summaries.</p>
+
+                <form id="emailForm">
+                    <textarea name="email" placeholder="Paste your email here..." required></textarea>
+                    <button type="submit">Summarize <span>↗</span></button>
+                </form>
+
+                <div class="loading hidden" id="summary-loading">✦ Summarizing email...</div>
+                <div class="result hidden" id="summary-box">
+                    <h3>✦ Summary</h3>
+                    <div id="summary"></div>
+                </div>
+            </div>
+
+        </section>
+    </main>
+
+    <footer>Made with <span>♥</span> and AI</footer>
+
+    <script>
+        async function handleSubmit(formId, endpoint, loadingId, boxId, outputId) {
+            const form = document.getElementById(formId);
+            const loading = document.getElementById(loadingId);
+            const box = document.getElementById(boxId);
+            const output = document.getElementById(outputId);
+            const button = form.querySelector("button");
+
+            form.addEventListener("submit", async (e) => {
+                e.preventDefault();
+
+                loading.classList.remove("hidden");
+                box.classList.add("hidden");
+                button.disabled = true;
+
+                try {
+                    const res = await fetch(endpoint, {
+                        method: "POST",
+                        body: new FormData(form)
+                    });
+
+                    const data = await res.json();
+                    if (!res.ok) throw new Error(data.error || "Request failed");
+
+                    output.innerText = data.response || data.error;
+                    box.classList.remove("hidden");
+
+                } catch (err) {
+                    output.innerText = err.message || "Something went wrong.";
+                    box.classList.remove("hidden");
+                } finally {
+                    loading.classList.add("hidden");
+                    button.disabled = false;
+                }
+            });
+        }
+
+        handleSubmit("askForm", "/ask", "ans-loading", "answer-box", "answer");
+        handleSubmit("emailForm", "/summarize", "summary-loading", "summary-box", "summary");
+    </script>
+
+</body>
+</html>
